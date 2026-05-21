@@ -1,0 +1,27 @@
+name: THE TITAN GALAXY RDP (Fixed Edition)
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: 1. PRE-EMPTIVE FIREWALL
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        
+    - name: 2. OPTIMIZATION FOR GAMING
+      run: |
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Avalon.Graphics" -Name "DisableHWAcceleration" -Value 0
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Name "ColorDepth" -Value 4
+        
+    - name: 3. START ULTRALIGHT TUNNEL
+      run: |
+        net user runneradmin GamingPotato1006 /add
+        net localgroup administrators runneradmin /add
+        Write-Host "=========================================="
+        Write-Host "SERVER USERNAME: runneradmin"
+        Write-Host "SERVER PASSWORD: GamingPotato1006"
+        Write-Host "=========================================="
+        ssh -o StrictHostKeyChecking=no -p 443 -R 0:localhost:3389 rdp@a.pinggy.io
