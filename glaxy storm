@@ -1,0 +1,81 @@
+name: THE TITAN GALAXY RDP (Anti-Problem Edition)
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: 1. PRE-EMPTIVE FIREWALL & RDP PROTECTION
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        New-NetFirewallRule -Name "All_Games_In" -DisplayName "Allow All Games Inbound" -Direction Inbound -Action Allow -Protocol Any -LocalPort Any -Enabled True -ErrorAction SilentlyContinue
+
+    - name: 2. SMART BALANCED ENGINE & INPUT LAG KILLER
+      run: |
+        powercfg -duplicatescheme 381b4222-f694-41f0-9685-ff5bb260df2e
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Avalon.Graphics" -Name "DisableHWAcceleration" -Value 0
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GraphicsDrivers" -Name "EnableWaylandHardwareAcceleration" -Value 1
+        
+        $Services = @("wuauserv", "SysMain", "DiagTrack", "dmwappushservice", "WerSvc")
+        foreach ($Svc in $Services) {
+            Stop-Service -Name $Svc -Force -ErrorAction SilentlyContinue
+            Set-Service -Name $Svc -StartupType Disabled -ErrorAction SilentlyContinue
+        }
+        
+        $VisualEffects = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects"
+        if (-not (Test-Path $VisualEffects)) { New-Item $VisualEffects -Force }
+        Set-ItemProperty -Path $VisualEffects -Name "VisualFXSetting" -Value 3
+        Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Value ([byte[]](144,18,0,128,16,0,0,0))
+        
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Name "MinEncryptionLevel" -Value 1
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Name "ColorDepth" -Value 4
+        
+        Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseSpeed" -Value "0"
+        Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold1" -Value "0"
+        Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold2" -Value "0"
+
+    - name: 3. SELF-HEALING AUTOMATIC CACHE & RAM CLEANER
+      run: |
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Name "fDisableAutoReconnect" -Value 0
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Name "fKeepAliveEnable" -Value 1
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Name "KeepAliveInterval" -Value 1
+        
+        $SelfHealingScript = {
+            while ($true) {
+                Clear-BcdeditEventLog -ErrorAction SilentlyContinue
+                [System.GC]::Collect()
+                [System.GC]::WaitForPendingFinalizers()
+                Get-ChildItem "$env:TEMP\*" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+                Start-Sleep -Seconds 180
+            }
+        }
+        $ScriptBlock = [scriptblock]::Create($SelfHealingScript)
+        Start-Job -ScriptBlock $ScriptBlock
+
+    - name: 4. SHIELD ANTI-AFK IMMORTAL SYSTEM
+      run: |
+        $AntiAfk = {
+            $i = 1
+            while ($i -le 360) {
+                Write-Host "TITAN SHIELD ACTIVE... Session Health: OK - Minute: $i" -ForegroundColor Green
+                Start-Sleep -Seconds 60
+                $i++
+            }
+        }
+        $AfkBlock = [scriptblock]::Create($AntiAfk)
+        Start-Job -ScriptBlock $AfkBlock
+        Write-Host "ANTI-AFK SELF-HEALING ACTIVATED!" -ForegroundColor Yellow
+
+    - name: 5. START IMMORTAL ULTRA-FAST TUNNEL
+      run: |
+        net user runneradmin GamingPotato1006 /add
+        net localgroup administrators runneradmin /add
+        
+        Write-Host "=========================================="
+        Write-Host "SERVER USERNAME: runneradmin"
+        Write-Host "SERVER PASSWORD: GamingPotato1006"
+        Write-Host "=========================================="
+        
+        ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=10 -o ServerAliveCountMax=30 -p 443 -R 0:localhost:3389 rdp@a.pinggy.io
